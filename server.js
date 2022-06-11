@@ -25,6 +25,7 @@ const dbActions = () => {
         "Add Department",
         "add Employees",
         "Update Employee Role",
+        "Quit"
       ],
     })
     .then((answer) => {
