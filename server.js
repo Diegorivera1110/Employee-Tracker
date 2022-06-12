@@ -129,6 +129,7 @@ viewRoles = () => {
    })
 };
 
+// function for user to view all departments within company
 viewDepartments = () => {
   console.log('All Departments within company...');
   const sql = 
@@ -140,3 +141,30 @@ viewDepartments = () => {
     managerPrompt();
   })
 };
+
+// function for user to add department to company
+addDepartment = () => {
+   inquirer.prompt([
+    {
+      type: 'input',
+      name: 'name',
+      message: 'What will the new Department be called? (Reuired)',
+      validate: (deptInput) => {
+        if (deptInput) {
+          return true;
+        } else {
+          console.log('Please enter the name of the Department');
+          return false
+        }
+      },
+    }
+  ])
+  .then(answer => {
+    const sql = `INSERT INTO department (name) VALUES (?)`;
+    db.query(sql, answer.name, (err, res) => {
+      if (err) throw err;
+      console.log(answer.name + ' Has been added to Departments');
+      viewDepartments();
+    })  
+  })
+}
