@@ -6,14 +6,14 @@ const figlet = require('figlet');
 
 require('dotenv').config();
 
-const connection = mysql.createConnection({
+const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: process.env.DB_PASSWORD,
   database: 'team',
 });
 
-connection.connect((err) => {
+db.connect((err) => {
   if (err) throw err;
   managerPrompt();
 
@@ -53,11 +53,11 @@ const managerPrompt = () => {
   ])
     .then((answers) => {
       const {firstAction} = answers;
-      if (firstAction === 'View All Employees') {
+      if (firstAction === 'View all Departments') {
         viewEmployees();
       }
       console.log('roles are working');
-      if (firstAction === 'View All Roles') {
+      if (firstAction === 'View all Roles') {
         viewRoles();
       }
       if (firstAction === 'View all Departments') {
@@ -80,7 +80,7 @@ const managerPrompt = () => {
       }
       if (firstAction === 'Quit') {
         console.log('quit is working');
-        connection.end();
+        db.end();
         managerPrompt();
       };
       // console.log(answers);
@@ -103,13 +103,8 @@ viewEmployees = () => {
     LEFT JOIN role on employee.role_id = role.id
     LEFT JOIN department on role.department_id = department.id
     LEFT JOIN employee manager on manager.id = employee.manager_id`;
-  // employee.first_name,
-  // employee.last_name,`;
-  // role.title,
-  // department.name AS department,
-  // role.salary;
 
-  connection.query(sql, (err, rows) => {
+  db.query(sql, (err, rows) => {
     if (err) throw err;
     console.table(rows);
     managerPrompt();
@@ -121,13 +116,27 @@ viewRoles = () => {
   console.log('All Roles within company...');
   const sql = 
   `SELECT role.id,
-   role.title,
-   department.name AS department FROM role
-   INNER JOIN department ON role.department_id = department.id`;
+   role.title as role,
+   role.salary,
+   department.name AS department 
+   FROM role
+   LEFT JOIN department ON role.department_id = department.id`;
 
-   connection.query(sql, (err, rows) => {
+   db.query(sql, (err, rows) => {
      if (err) throw err;
      console.table(rows);
      managerPrompt();
    })
+};
+
+viewDepartments = () => {
+  console.log('All Departments within company...');
+  const sql = 
+  `SELECT * FROM department`;
+
+  db.query(sql, (err, rows) => {
+    if (err) throw err;
+    console.table(rows);
+    managerPrompt();
+  })
 };
