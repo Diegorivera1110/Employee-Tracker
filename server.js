@@ -280,7 +280,7 @@ addEmployee = () => {
         {
           tpye: 'list',
           name: 'role',
-          message: 'What will the Employees role be?',
+          message: 'What will the Employees role be? (Enter role ID #)',
           choices: role,
         }
       ])
