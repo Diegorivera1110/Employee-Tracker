@@ -112,7 +112,7 @@ viewEmployees = () => {
 
 // function for user to view all Roles within company
 viewRoles = () => {
-  console.log("All Roles within company...");
+  console.log('All Roles within company...');
   const sql = `SELECT role.id,
    role.title as role,
    role.salary,
@@ -129,7 +129,7 @@ viewRoles = () => {
 
 // function for user to view all departments within company
 viewDepartments = () => {
-  console.log("All Departments within company...");
+  console.log('All Departments within company...');
   const sql = `SELECT * FROM department`;
 
   db.query(sql, (err, rows) => {
@@ -144,14 +144,14 @@ addDepartment = () => {
   inquirer
     .prompt([
       {
-        type: "input",
-        name: "newDept",
-        message: "What will the new Department be called? (Reuired)",
+        type: 'input',
+        name: 'newDept',
+        message: 'What will the new Department be called? (Reuired)',
         validate: (deptInput) => {
           if (deptInput) {
             return true;
           } else {
-            console.log("Please enter the name of the Department");
+            console.log('Please enter the name of the Department');
             return false;
           }
         },
@@ -161,7 +161,7 @@ addDepartment = () => {
       const sql = `INSERT INTO department (name) VALUES (?)`;
       db.query(sql, answer.newDept, (err, res) => {
         if (err) throw err;
-        console.log(answer.name + " Has been added to Departments");
+        console.log(answer.name + ' Has been added to Departments');
         viewDepartments();
       });
     });
@@ -190,7 +190,7 @@ addRole = () => {
         message: "What is the salary for this role? (Required)",
         validate: (salaryInput) => {
           if (isNaN(salaryInput)) {
-            console.log("Please enter an amount for the salary");
+            console.log('Please enter an amount for the salary');
             return false;
           } else {
             return true;
@@ -211,8 +211,8 @@ addRole = () => {
         inquirer
           .prompt([
             {
-              tpye: "list",
-              name: "dept",
+              tpye: 'list',
+              name: 'dept',
               message:
                 "Which department will this role belong? (Enter Dept. ID #)",
               choices: dept,
@@ -234,3 +234,90 @@ addRole = () => {
       });
     });
 };
+
+// funciotn to add an employee to company
+addEmployee = () => {
+  inquirer
+  .prompt([
+    {
+      type: 'input',
+      name: 'first',
+      message: 'What is the Employees first name? (Required)',
+      validate: (nameInput) => {
+        if (nameInput) {
+          return true;
+        } else {
+          console.log('Please enter a first name');
+          return false
+        }
+      } 
+    },
+    {
+      type: 'input',
+      name: 'last',
+      message: 'What is the Employees last name? (Required)',
+      validate: (lastInput) => {
+        if (lastInput) {
+          return true;
+        } else {
+          console.log('Please enter a last name');
+          return false;
+        }
+      }
+    }
+  ])
+  .then(answer => {
+    const employeeInput = [answer.first, answer.last]
+
+    const roleData = `SELECT role.id, role.title FROM role`;
+
+    db.query(roleData, (err, data) => {
+      if (err) throw err;
+
+      const role = data.map(({ id, title }) => ({ name: title, vlaue: id }));
+
+      inquirer.prompt([
+        {
+          tpye: 'list',
+          name: 'role',
+          message: 'What will the Employees role be?',
+          choices: role,
+        }
+      ])
+      .then((selectedRole) => {
+        const role = selectedRole.role;
+        employeeInput.push(role);
+
+        const managerData = `SELECT * FROM employee`;
+        
+        db.query(managerData, (err, data) => {
+          if (err) throw err;
+
+          const manager = data.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }));
+
+          inquirer.prompt([
+            {
+              type: 'list',
+              name: 'manager',
+              message: 'Who will be this employees manager?',
+              choices: manager
+            }
+          ])
+          .then(selectecManager => {
+            const manager = selectecManager.manager;
+            employeeInput.push(manager);
+
+            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+
+            db.query(sql, employeeInput, (err, res) => {
+              if (err) throw err;
+              console.log("Employee added to company");
+
+              viewEmployees();
+            });
+          })
+        })
+      })
+    })
+  })
+}
